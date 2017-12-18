@@ -37,6 +37,7 @@ export default class VideoPlayer extends Component {
 
             isFullscreen: this.props.resizeMode === 'cover' || false,
             showTimeRemaining: true,
+            showCurrentTime: true,
             volumeTrackWidth: 0,
             lastScreenPress: 0,
             volumeFillWidth: 0,
@@ -425,6 +426,7 @@ export default class VideoPlayer extends Component {
     _toggleTimer() {
         let state = this.state;
         state.showTimeRemaining = !state.showTimeRemaining;
+        state.showCurrentTime = !state.showCurrentTime;
         this.setState(state);
     }
 
@@ -447,12 +449,21 @@ export default class VideoPlayer extends Component {
      * based on if they want to see time remaining
      * or duration. Formatted to look as 00:00.
      */
-    calculateTime() {
+    calculateTimeRemaining() {
         if (this.state.showTimeRemaining) {
             const time = this.state.duration - this.state.currentTime;
             return `-${this.formatTime(time)}`;
         }
 
+        return this.formatTime(this.state.currentTime);
+    }
+
+     /**
+     * Calculate the time to show in the timer area
+     * based on if they want to see time remaining
+     * or duration. Formatted to look as 00:00.
+     */
+    calculateCurrentTime() {
         return this.formatTime(this.state.currentTime);
     }
 
@@ -898,8 +909,8 @@ export default class VideoPlayer extends Component {
      */
     renderBottomControls() {
 
-        const playPauseControl = !this.props.disablePlayPause ? this.renderPlayPause() : this.renderNullControl();
-        const timerControl = !this.props.disableTimer ? this.renderTimer() : this.renderNullControl();
+        const currentTimeControl = !this.props.disableCurrentTime ? this.renderCurrentTime() : this.renderNullControl();
+        const timeRemainingControl = !this.props.disableTimeRemaining ? this.renderTimeRemaining() : this.renderNullControl();
         const seekbarControl = !this.props.disableSeekbar ? this.renderSeekbar() : this.renderNullControl();
 
         return (
@@ -919,9 +930,9 @@ export default class VideoPlayer extends Component {
                         styles.controls.row,
                         styles.controls.bottomControlGroup
                     ]}>
-                        {playPauseControl}
+                        {currentTimeControl}
                         {this.renderTitle()}
-                        {timerControl}
+                        {timeRemainingControl}
 
                     </View>
                 </ImageBackground>
@@ -1002,13 +1013,27 @@ export default class VideoPlayer extends Component {
     }
 
     /**
-     * Show our timer.
+     * Show our time Remaining.
      */
-    renderTimer() {
+    renderTimeRemaining() {
 
         return this.renderControl(
-            <Text style={styles.controls.timerText}>
-                {this.calculateTime()}
+            <Text style={styles.controls.timeRemainingText}>
+                {this.calculateTimeRemaining()}
+            </Text>,
+            this.methods.toggleTimer,
+            styles.controls.timer
+        );
+    }
+
+    /**
+     * Show our current time.
+     */
+    renderCurrentTime() {
+
+        return this.renderControl(
+            <Text style={styles.controls.currentTimeText}>
+                {this.calculateCurrentTime()}
             </Text>,
             this.methods.toggleTimer,
             styles.controls.timer
@@ -1237,11 +1262,17 @@ const styles = {
         timer: {
             width: 80,
         },
-        timerText: {
+        timeRemainingText: {
             backgroundColor: 'transparent',
             color: '#FFF',
             fontSize: 11,
             textAlign: 'right',
+        },
+        currentTimeText: {
+            backgroundColor: 'transparent',
+            color: '#FFF',
+            fontSize: 11,
+            textAlign: 'left',
         },
     }),
     volume: StyleSheet.create({
