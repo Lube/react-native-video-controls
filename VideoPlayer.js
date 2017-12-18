@@ -32,7 +32,7 @@ export default class VideoPlayer extends Component {
             muted: this.props.muted || false,
             volume: this.props.volume || 1,
             rate: this.props.rate || 1,
-            showTitle: this.props.showTitle || false,
+            showTitleFullscreenOnly: this.props.showTitleFullscreenOnly || false,
             // Controls
 
             isFullscreen: this.props.resizeMode === 'cover' || false,
@@ -638,7 +638,7 @@ export default class VideoPlayer extends Component {
     componentWillReceiveProps(nextProps) {
 
         this.setState({
-            showTitle: nextProps.showTitle
+            showTitleFullscreenOnly: nextProps.showTitleFullscreenOnly
         }, () => {
             if (this.state.paused !== nextProps.paused) {
                 this.setState({
@@ -982,7 +982,7 @@ export default class VideoPlayer extends Component {
      */
     renderTitle() {
 
-        if (this.opts.title && this.state.showTitle) {
+        if (this.opts.title && this.state.showTitleFullscreenOnly) {
             return (
                 <View style={[
                     styles.controls.control,
