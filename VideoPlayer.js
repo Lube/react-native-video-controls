@@ -113,6 +113,10 @@ export default class VideoPlayer extends Component {
                 marginTop: new Animated.Value(0),
                 opacity: new Animated.Value(1),
             },
+            playPause: {
+                marginTop: new Animated.Value(0),
+                opacity: new Animated.Value(1),
+            },
             video: {
                 opacity: new Animated.Value(1),
             },
@@ -299,17 +303,13 @@ export default class VideoPlayer extends Component {
                 { toValue: 0 }
             ),
             Animated.timing(
-                this.animations.topControl.marginTop,
-                { toValue: -100 }
+                this.animations.playPause.opacity,
+                { toValue: 0 }
             ),
             Animated.timing(
                 this.animations.bottomControl.opacity,
                 { toValue: 0 }
-            ),
-            Animated.timing(
-                this.animations.bottomControl.marginBottom,
-                { toValue: -100 }
-            ),
+            )
         ]).start();
     }
 
@@ -325,16 +325,12 @@ export default class VideoPlayer extends Component {
                 { toValue: 1 }
             ),
             Animated.timing(
-                this.animations.topControl.marginTop,
-                { toValue: 0 }
+                this.animations.playPause.opacity,
+                { toValue: 1 }
             ),
             Animated.timing(
                 this.animations.bottomControl.opacity,
                 { toValue: 1 }
-            ),
-            Animated.timing(
-                this.animations.bottomControl.marginBottom,
-                { toValue: 0 }
             ),
         ]).start();
     }
@@ -458,11 +454,11 @@ export default class VideoPlayer extends Component {
         return this.formatTime(this.state.currentTime);
     }
 
-     /**
-     * Calculate the time to show in the timer area
-     * based on if they want to see time remaining
-     * or duration. Formatted to look as 00:00.
-     */
+    /**
+    * Calculate the time to show in the timer area
+    * based on if they want to see time remaining
+    * or duration. Formatted to look as 00:00.
+    */
     calculateCurrentTime() {
         return this.formatTime(this.state.currentTime);
     }
@@ -980,9 +976,17 @@ export default class VideoPlayer extends Component {
      */
     renderPlayPause() {
 
-        let source = this.state.paused === true ? require('./assets/img/play.png') : require('./assets/img/pause.png');
+        let source = this.state.paused === true ? require('./assets/img/play_2.png') : require('./assets/img/pause_2.png');
         return this.renderControl(
-            <Image source={source} />,
+            <Animated.View style={[
+                styles.controls.playPause,
+                {
+                    opacity: this.animations.playPause.opacity,
+                    marginTop: this.animations.playPause.marginTop,
+                }
+            ]}>
+                <Image source={source} />
+            </Animated.View>,
             this.methods.togglePlayPause,
             styles.controls.playPause
         );
@@ -1121,6 +1125,7 @@ export default class VideoPlayer extends Component {
                     {this.renderError()}
                     {this.renderTopControls()}
                     {this.renderLoader()}
+                    {!this.props.disablePlayPause && this.renderPlayPause()}
                     {this.renderBottomControls()}
                 </View>
             </TouchableWithoutFeedback>
@@ -1246,9 +1251,13 @@ const styles = {
             flexDirection: 'row',
         },
         playPause: {
-            position: 'relative',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            zIndex: 0,
+            height: 80,
             width: 80,
-            zIndex: 0
+            marginTop: 45,
+            alignSelf: 'center'
         },
         title: {
             alignItems: 'center',
