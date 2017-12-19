@@ -80,8 +80,10 @@ export default class VideoPlayer extends Component {
          * Functions used throughout the application
          */
         this.methods = {
+            fastForward: this.props.onFastForward || this._fastForward.bind(this),
             onBack: this.props.onBack || this._onBack.bind(this),
-            toggleFullscreen: this._toggleFullscreen.bind(this),
+            rewind: this.props.onRewind || this._rewind.bind(this),
+            toggleFullscreen: this.props.toggleFullscreen || this._toggleFullscreen.bind(this),
             togglePlayPause: this._togglePlayPause.bind(this),
             toggleControls: this._toggleControls.bind(this),
             toggleTimer: this._toggleTimer.bind(this),
@@ -413,6 +415,14 @@ export default class VideoPlayer extends Component {
         let state = this.state;
         state.paused = !state.paused;
         this.setState(state);
+    }
+
+    _fastForward() {
+        this.seekTo(this.state.currentTime + 10);
+    }
+
+    _rewind() {
+        this.seekTo(this.state.currentTime - 10);
     }
 
     /**
@@ -976,7 +986,7 @@ export default class VideoPlayer extends Component {
      */
     renderPlayPause() {
 
-        let source = this.state.paused === true ? require('./assets/img/play_2.png') : require('./assets/img/pause_2.png');
+        let source = this.state.paused === true ? require('./assets/img/play_3.png') : require('./assets/img/pause_3.png');
         return this.renderControl(
             <Animated.View style={[
                 styles.controls.playPause,
@@ -985,9 +995,41 @@ export default class VideoPlayer extends Component {
                     marginTop: this.animations.playPause.marginTop,
                 }
             ]}>
-                <Image source={source} />
+                <Image source={source} style={{ marginTop: 20 }} />
             </Animated.View>,
             this.methods.togglePlayPause,
+            styles.controls.playPause
+        );
+    }
+
+    renderFastForward() {
+        return this.renderControl(
+            <Animated.View style={[
+                styles.controls.playPause,
+                {
+                    opacity: this.animations.playPause.opacity,
+                    marginTop: this.animations.playPause.marginTop,
+                }
+            ]}>
+                <Image source={require('./assets/img/forward_10.png')} />
+            </Animated.View>,
+            this.methods.fastForward,
+            styles.controls.playPause
+        );
+    }
+
+    renderRewind() {
+        return this.renderControl(
+            <Animated.View style={[
+                styles.controls.playPause,
+                {
+                    opacity: this.animations.playPause.opacity,
+                    marginTop: this.animations.playPause.marginTop,
+                }
+            ]}>
+                <Image source={require('./assets/img/replay_10.png')} />
+            </Animated.View>,
+            this.methods.rewind,
             styles.controls.playPause
         );
     }
@@ -1125,7 +1167,12 @@ export default class VideoPlayer extends Component {
                     {this.renderError()}
                     {this.renderTopControls()}
                     {this.renderLoader()}
-                    {!this.props.disablePlayPause && this.renderPlayPause()}
+                    {!this.state.loading &&
+                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                            {!this.props.disablePlayPause && this.renderRewind()}
+                            {!this.props.disablePlayPause && this.renderPlayPause()}
+                            {!this.props.disablePlayPause && this.renderFastForward()}
+                        </View>}
                     {this.renderBottomControls()}
                 </View>
             </TouchableWithoutFeedback>
@@ -1256,7 +1303,7 @@ const styles = {
             zIndex: 0,
             height: 80,
             width: 80,
-            marginTop: 45,
+            marginTop: 40,
             alignSelf: 'center'
         },
         title: {
