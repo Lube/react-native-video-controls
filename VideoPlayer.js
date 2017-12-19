@@ -81,9 +81,9 @@ export default class VideoPlayer extends Component {
          */
         this.methods = {
             fastForward: this.props.onFastForward || this._fastForward.bind(this),
-            onBack: this.props.onBack || this._onBack.bind(this),
+            onBack: this._onBack.bind(this),
             rewind: this.props.onRewind || this._rewind.bind(this),
-            toggleFullscreen: this.props.toggleFullscreen || this._toggleFullscreen.bind(this),
+            toggleFullscreen: this._toggleFullscreen.bind(this),
             togglePlayPause: this._togglePlayPause.bind(this),
             toggleControls: this._toggleControls.bind(this),
             toggleTimer: this._toggleTimer.bind(this),
@@ -289,6 +289,7 @@ export default class VideoPlayer extends Component {
      * Reset the timer completely
      */
     resetControlTimeout() {
+        if (!this.state.showControls) return;
         this.clearControlTimeout();
         this.setControlTimeout();
     }
@@ -401,28 +402,48 @@ export default class VideoPlayer extends Component {
      * isFullscreen state.
      */
     _toggleFullscreen() {
-        let state = this.state;
-        state.isFullscreen = !state.isFullscreen;
-        state.resizeMode = state.isFullscreen === true ? 'cover' : 'contain';
+        if (!this.state.showControls) {
+            this._onScreenTouch();
+        } else {
+            if (this.props.toggleFullscreen) {
+                this.props.toggleFullscreen();
+            }
 
-        this.setState(state);
+            let state = this.state;
+            state.isFullscreen = !state.isFullscreen;
+            state.resizeMode = state.isFullscreen === true ? 'cover' : 'contain';
+
+            this.setState(state);
+        }
     }
 
     /**
      * Toggle playing state on <Video> component
      */
     _togglePlayPause() {
-        let state = this.state;
-        state.paused = !state.paused;
-        this.setState(state);
+        if (!this.state.showControls) {
+            this._onScreenTouch();
+        } else {
+            let state = this.state;
+            state.paused = !state.paused;
+            this.setState(state);
+        }
     }
 
     _fastForward() {
-        this.seekTo(this.state.currentTime + 10);
+        if (!this.state.showControls) {
+            this._onScreenTouch();
+        } else {
+            this.seekTo(this.state.currentTime + 10);
+        }
     }
 
     _rewind() {
-        this.seekTo(this.state.currentTime - 10);
+        if (!this.state.showControls) {
+            this._onScreenTouch();
+        } else {
+            this.seekTo(this.state.currentTime - 10);
+        }
     }
 
     /**
@@ -442,11 +463,20 @@ export default class VideoPlayer extends Component {
      * navigator prop by default.
      */
     _onBack() {
-        if (this.props.navigator && this.props.navigator.pop) {
-            this.props.navigator.pop();
-        }
-        else {
-            console.warn('Warning: _onBack requires navigator property to function. Either modify the onBack prop or pass a navigator prop');
+        if (!this.state.showControls) {
+            this._onScreenTouch();
+        } else {
+            if (this.props.onBack) {
+                this.props.onBack();
+                return;
+            }
+
+            if (this.props.navigator && this.props.navigator.pop) {
+                this.props.navigator.pop();
+            }
+            else {
+                console.warn('Warning: _onBack requires navigator property to function. Either modify the onBack prop or pass a navigator prop');
+            }
         }
     }
 
@@ -805,7 +835,8 @@ export default class VideoPlayer extends Component {
         return (
             <TouchableHighlight
                 underlayColor="transparent"
-                activeOpacity={0.3}
+                activeOpacity={this.state.showControls ? 0.3 : 0}
+                disabled={!this.state.showControls}
                 onPress={() => {
                     this.resetControlTimeout();
                     callback();
