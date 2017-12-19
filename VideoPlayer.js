@@ -723,8 +723,8 @@ export default class VideoPlayer extends Component {
         this.player.seekPanResponder = PanResponder.create({
 
             // Ask to be the responder.
-            onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onMoveShouldSetPanResponder: (evt, gestureState) => true,
+            onStartShouldSetPanResponder: (evt, gestureState) => this.state.showControls,
+            onMoveShouldSetPanResponder: (evt, gestureState) => this.state.showControls,
 
             /**
              * When we start the pan tell the machine that we're
@@ -742,6 +742,7 @@ export default class VideoPlayer extends Component {
              * When panning, update the seekbar position, duh.
              */
             onPanResponderMove: (evt, gestureState) => {
+
                 const position = this.state.seekerOffset + gestureState.dx;
                 this.setSeekerPosition(position);
             },
@@ -772,8 +773,8 @@ export default class VideoPlayer extends Component {
      */
     initVolumePanResponder() {
         this.player.volumePanResponder = PanResponder.create({
-            onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onMoveShouldSetPanResponder: (evt, gestureState) => true,
+            onStartShouldSetPanResponder: (evt, gestureState) => this.state.showControls,
+            onMoveShouldSetPanResponder: (evt, gestureState) => this.state.showControls,
             onPanResponderGrant: (evt, gestureState) => {
                 this.clearControlTimeout();
             },
